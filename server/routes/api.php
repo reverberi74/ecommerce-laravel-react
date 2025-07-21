@@ -1,26 +1,37 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
-Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-});
-
+// 🔐 Autenticazione
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+// 👤 Profilo utente autenticato
 Route::middleware('auth:api')->get('/me', [AuthController::class, 'me']);
 
+// 📦 Rotte pubbliche o comuni
 Route::middleware('auth:api')->group(function () {
-    // Rotte CRUD per i prodotti
-    Route::get('/products', [ProductController::class, 'index']);        // lista tutti i prodotti
-    Route::post('/products', [ProductController::class, 'store']);       // crea nuovo prodotto
-    Route::get('/products/{id}', [ProductController::class, 'show']);    // mostra prodotto singolo
-    Route::put('/products/{id}', [ProductController::class, 'update']);  // aggiorna prodotto
-    Route::delete('/products/{id}', [ProductController::class, 'destroy']); // elimina prodotto
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{id}', [ProductController::class, 'show']);
+
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);
+});
+
+// 🔐 Rotte solo per admin
+Route::middleware(['auth:api', 'role:admin'])->group(function () {
+    // 📦 CRUD Prodotti
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
+    // 🗂️ CRUD Categorie
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 });

@@ -10,7 +10,7 @@ class ProductController extends Controller
     // GET /api/products
     public function index()
     {
-        return response()->json(Product::all());
+        return response()->json(Product::with('category')->get());
     }
 
     // POST /api/products
@@ -22,13 +22,12 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'stock' => 'required|integer',
             'image' => 'nullable|string',
-            'category' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $product = Product::create($data);
         return response()->json($product, 201);
     }
-
     // GET /api/products/{id}
     public function show($id)
     {
@@ -53,12 +52,13 @@ class ProductController extends Controller
             'price' => 'sometimes|numeric',
             'stock' => 'sometimes|integer',
             'image' => 'nullable|string',
-            'category' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $product->update($data);
         return response()->json($product);
     }
+
 
     // DELETE /api/products/{id}
     public function destroy($id)
@@ -72,4 +72,3 @@ class ProductController extends Controller
         return response()->json(['message' => 'Prodotto eliminato']);
     }
 }
-

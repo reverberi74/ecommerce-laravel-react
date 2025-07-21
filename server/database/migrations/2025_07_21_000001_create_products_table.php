@@ -13,8 +13,14 @@ return new class extends Migration {
             $table->text('description')->nullable();         // Descrizione (opzionale)
             $table->decimal('price', 8, 2);                  // Prezzo (es. 999999.99)
             $table->unsignedInteger('stock')->default(0);    // Quantità disponibile
-            $table->string('image')->nullable();             // Percorso immagine
-            $table->string('category')->nullable();          // Categoria prodotto
+            $table->string('image')->nullable();             // Percorso immagine (opzionale)
+
+            // 🔁 Foreign key per categoria (supporta anche sottocategorie)
+            $table->foreignId('category_id')
+                  ->nullable()
+                  ->constrained('categories')
+                  ->onDelete('set null');
+
             $table->timestamps();                            // created_at / updated_at
         });
     }

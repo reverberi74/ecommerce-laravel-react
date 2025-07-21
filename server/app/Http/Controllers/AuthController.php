@@ -13,7 +13,6 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        // 1. Validazione
         $validator = Validator::make($request->all(), [
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
@@ -26,24 +25,21 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // 2. Creazione utente
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'role'     => 'user', // 👈 FORZATO QUI
         ]);
 
-        // 3. Generazione token JWT
         $token = JWTAuth::fromUser($user);
 
-        // 4. Risposta JSON
         return response()->json([
             'message' => 'Utente registrato con successo',
             'user'    => $user,
             'token'   => $token
         ], 201);
     }
-
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');

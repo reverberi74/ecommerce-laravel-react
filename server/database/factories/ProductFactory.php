@@ -3,10 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Category;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
- */
 class ProductFactory extends Factory
 {
     public function definition(): array
@@ -17,7 +15,8 @@ class ProductFactory extends Factory
             'price' => $this->faker->randomFloat(2, 5, 500),
             'stock' => $this->faker->numberBetween(0, 100),
             'image' => $this->faker->imageUrl(640, 480, 'products', true),
-            'category' => $this->faker->randomElement(['elettronica', 'libri', 'abbigliamento', 'casa', 'giocattoli']),
+            // 👇 Associa categoria esistente a caso
+            'category_id' => Category::inRandomOrder()->first()?->id,
         ];
     }
 }

@@ -10,7 +10,9 @@ class DatabaseSeeder extends Seeder
     {
         // Altri seeder (se presenti)
         $this->call([
-            ProductSeeder::class,
+            AdminSeeder::class,    // infine: utente admin
+            CategorySeeder::class, // prima: genera tutte le categorie e sottocategorie
+            ProductSeeder::class,  // poi: assegna una categoria esistente a ogni prodotto
         ]);
     }
 }

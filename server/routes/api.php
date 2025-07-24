@@ -1,11 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\CategoryController;
 use Illuminate\Http\Request;
 use App\Services\ImageUploadService;
+use App\Http\Controllers\Api\CartController;
 
 // 🔐 Autenticazione
 Route::prefix('auth')->group(function () {
@@ -24,6 +25,28 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
 });
+
+// 🛒 Rotte Carrello (guest + auth)
+Route::prefix('cart')->group(function () {
+    // 📥 Visualizza carrello corrente (guest o user)
+    Route::get('/', [CartController::class, 'getCart']);
+
+    // ➕ Aggiungi un prodotto
+    Route::post('/add', [CartController::class, 'addToCart']);
+
+    // ✏️ Aggiorna quantità item (protetto)
+    Route::put('/item/{id}', [CartController::class, 'updateItem'])->middleware('checkCart');
+
+    // ❌ Rimuovi item (protetto)
+    Route::delete('/item/{id}', [CartController::class, 'removeItem'])->middleware('checkCart');
+
+    // 🧹 Svuota tutto il carrello
+    Route::delete('/clear', [CartController::class, 'clearCart']);
+
+    // 🔁 Merge carrello guest → user (richiede login)
+    Route::middleware('auth:api')->post('/merge', [CartController::class, 'mergeGuestCart']);
+});
+
 
 // 🔐 Rotte solo per admin
 Route::middleware(['auth:api', 'role:admin'])->group(function () {

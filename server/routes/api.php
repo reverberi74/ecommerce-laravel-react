@@ -7,6 +7,9 @@ use App\Http\Controllers\Api\CategoryController;
 use Illuminate\Http\Request;
 use App\Services\ImageUploadService;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\OrderStatusController;
+use App\Http\Controllers\Api\CheckoutOrderController;
 
 // 🔐 Autenticazione
 Route::prefix('auth')->group(function () {
@@ -47,6 +50,20 @@ Route::prefix('cart')->group(function () {
     Route::middleware('auth:api')->post('/merge', [CartController::class, 'mergeGuestCart']);
 });
 
+// 📦 Ordini (utente autenticato)
+Route::prefix('orders')->middleware('auth:api')->group(function () {
+    Route::get('/', [OrderController::class, 'index']);         // Lista ordini utente
+    Route::get('/{id}', [OrderController::class, 'show']);      // Dettaglio ordine
+});
+
+// 🔄 Update stato ordine (solo admin)
+Route::prefix('orders')->middleware(['auth:api', 'role:admin'])->group(function () {
+    Route::patch('/{id}/status', [OrderStatusController::class, 'update']);
+});
+
+
+// 🧾 Checkout → crea un ordine dal carrello attuale
+Route::middleware('auth:api')->post('/checkout', [CheckoutOrderController::class, 'store']);
 
 // 🔐 Rotte solo per admin
 Route::middleware(['auth:api', 'role:admin'])->group(function () {

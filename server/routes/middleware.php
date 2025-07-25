@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Middleware\CheckCartOwnership;
+use App\Http\Middleware\CheckCart;
 
 return [
     // Middleware di route personalizzati
-    'checkCart' => CheckCartOwnership::class,
+    'checkCart' => CheckCart::class,
 ];

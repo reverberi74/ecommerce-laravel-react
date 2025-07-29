@@ -10,6 +10,10 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OrderStatusController;
 use App\Http\Controllers\Api\CheckoutOrderController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\RefundController;
+use App\Http\Controllers\Api\WebhookController;
 
 // 🔐 Autenticazione
 Route::prefix('auth')->group(function () {
@@ -64,6 +68,43 @@ Route::prefix('orders')->middleware(['auth:api', 'role:admin'])->group(function 
 
 // 🧾 Checkout → crea un ordine dal carrello attuale
 Route::middleware('auth:api')->post('/checkout', [CheckoutOrderController::class, 'store']);
+
+// 💳 Pagamenti (autenticato)
+Route::prefix('payments')->middleware('auth:api')->group(function () {
+    // 🧾 Avvia un nuovo pagamento
+    Route::post('/initiate', [PaymentController::class, 'initiate']);
+
+    // ✅ Conferma il pagamento (es. dopo inserimento dati gateway)
+    Route::post('/confirm', [PaymentController::class, 'confirm']);
+
+    // 🔍 Recupera lo stato di un pagamento
+    Route::get('/{id}/status', [PaymentController::class, 'status']);
+});
+
+// 💾 Metodi di pagamento salvati (utente autenticato)
+Route::prefix('payment-methods')->middleware('auth:api')->group(function () {
+    // 📋 Lista dei metodi salvati
+    Route::get('/', [PaymentMethodController::class, 'index']);
+
+    // ➕ Salva un nuovo metodo (es. carta o PayPal)
+    Route::post('/', [PaymentMethodController::class, 'store']);
+
+    // ❌ Elimina un metodo salvato
+    Route::delete('/{id}', [PaymentMethodController::class, 'destroy']);
+
+    // ⭐ Imposta come predefinito
+    Route::patch('/{id}/default', [PaymentMethodController::class, 'setDefault']);
+});
+
+// 🔁 Rimborsi (solo admin)
+Route::prefix('refunds')->middleware(['auth:api', 'role:admin'])->group(function () {
+    // 🔄 Esegui un rimborso
+    Route::post('/', [RefundController::class, 'store']);
+
+    // 📂 Elenco rimborsi relativi a un pagamento
+    Route::get('/payment/{paymentId}', [RefundController::class, 'index']);
+});
+
 
 // 🔐 Rotte solo per admin
 Route::middleware(['auth:api', 'role:admin'])->group(function () {
